@@ -20,7 +20,7 @@
                 <h3 class="title">Create Staff</h3>
             </div>
             <div class="staff-area">
-                <form action ="" method="post" class="staff-form-inner">
+                <form action ="{{ route('staffs.store') }}" method="post" class="staff-form-inner">
 					@csrf
                     <label class="single-input-wrap">
                         <input type="text" placeholder="Name" name="name" required autocomplete="name" autofocus>
@@ -47,7 +47,7 @@
 						@enderror
                     </label>
                     <label class="single-input-wrap">
-                        <input type="text" placeholder="User name" name="username" required autocomplete="username">
+                        <input type="text" placeholder="User name" name="username" required autocomplete="username">_{{ Session::get('user_details')->postfix }}
 						@error('username')
 							<span class="invalid-feedback" role="alert">
 								<strong>{{ $message }}</strong>

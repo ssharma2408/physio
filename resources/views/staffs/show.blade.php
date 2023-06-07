@@ -21,8 +21,7 @@
 		</div>
 		<div class="balance-area-bg bg-transaction-details">
 			<div class="balance-title text-center">
-				<h4>Thomas</h4>
-				<p>Orthopedics</p>
+				<h1>{{ $staff->name }}</h1>				
 			</div>
 			<div class="ba-balance-inner text-center" style="background-image: url(assets/img/bg/2.png);">
 				<div class="icon">

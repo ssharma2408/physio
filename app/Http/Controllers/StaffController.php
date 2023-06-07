@@ -4,16 +4,23 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Http;
+
+use Session;
+
 class StaffController extends Controller
 {
     public function index()
     {
-        //abort_if(Gate::denies('staff_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $theUrl     = config('app.api_url').'v1/staffs';	   
+		$response   = Http ::withHeaders([
+            'Authorization' => 'Bearer '.Session::get('user_details')->token 
+        ])->get($theUrl);
+		
+		$staffs = json_decode($response->body())->data;		
 
-        //$staffs = Staff::with(['clinic'])->get();
-
-        //return view('staffs.index', compact('staffs'));
-        return view('staffs.index');
+        return view('staffs.index', compact('staffs'));
+        
     }
 
     public function create()
@@ -27,48 +34,100 @@ class StaffController extends Controller
     }
 
     public function store(Request $request)
-    {
-		dd($request);
-        /* $staff = Staff::create($request->all());
-
-        return redirect()->route('staffs.index'); */
-    }
-
-    public function edit(Request $request)
-    {
-        //abort_if(Gate::denies('staff_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-
-        /* $clinics = Clinic::pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
-
-        $staff->load('clinic'); */
-
-        //return view('staffs.edit', compact('clinics', 'staff'));
-        return view('staffs.edit');
-    }
-
-    public function update(UpdateStaffRequest $request, Staff $staff)
-    {
-        $staff->update($request->all());
+    {		
+		
+		$theUrl     = config('app.api_url').'v1/staffs';	   
+		$response   = Http ::withHeaders([
+            'Authorization' => 'Bearer '.Session::get('user_details')->token 
+        ])->post($theUrl, [
+			'name'=>$request['name'],
+			'email'=>$request['email'],
+			'mobile_number'=>$request['mobile'],
+			'username'=>$request['username']."_".Session::get('user_details')->postfix,
+			'password'=>$request['password'],
+			'clinic_id'=>$_ENV['CLINIC_ID'],
+		]);
+		
+		$staff = json_decode($response->body());		
 
         return redirect()->route('staffs.index');
     }
 
-    public function show(Request $request)
-    {
-        //abort_if(Gate::denies('staff_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+    public function edit()
+    {		
+		$url_arr = explode("/", url()->full());
 
-       // $staff->load('clinic');
+		$staff_id = $url_arr[count($url_arr)-2];
+		
+		$theUrl     = config('app.api_url').'v1/staffs/'.$staff_id;
+		$response   = Http ::withHeaders([
+            'Authorization' => 'Bearer '.Session::get('user_details')->token 
+        ])->get($theUrl);
+		
+		$staff = json_decode($response->body())->data;
+		
+		$staff->username = explode("_", $staff->username)[0];
 
-        //return view('staffs.show', compact('staff'));
-        return view('staffs.show');
+        return view('staffs.edit', compact('staff'));
+        
     }
 
-    public function destroy(Request $request)
+    public function update(Request $request)
     {
-        //abort_if(Gate::denies('staff_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        
+		$url_arr = explode("/", url()->full());
 
-        //$staff->delete();
+		$staff_id = $url_arr[count($url_arr)-1];	
+		
+		
+		$theUrl     = config('app.api_url').'v1/staffs/'.$staff_id;
+		$response   = Http ::withHeaders([
+            'Authorization' => 'Bearer '.Session::get('user_details')->token 
+        ])->put($theUrl, [
+			'name'=>$request['name'],
+			'email'=>$request['email'],
+			'mobile_number'=>$request['mobile'],
+			'username'=>$request['username']."_".Session::get('user_details')->postfix,
+			'password'=>$request['password'],
+			'clinic_id'=>$_ENV['CLINIC_ID'],
+		]);
+		
+		$staff = json_decode($response->body());
 
-        return back();
+        return redirect()->route('staffs.index');
+    }
+
+    public function show()
+    {
+        
+		$url_arr = explode("/", url()->full());
+
+		$staff_id = $url_arr[count($url_arr)-1];
+		
+		$theUrl     = config('app.api_url').'v1/staffs/'.$staff_id;
+		$response   = Http ::withHeaders([
+            'Authorization' => 'Bearer '.Session::get('user_details')->token 
+        ])->get($theUrl);
+		
+		$staff = json_decode($response->body())->data;	
+
+        return view('staffs.show', compact('staff'));
+        
+    }
+
+    public function destroy()
+    {
+        
+		$url_arr = explode("/", url()->full());
+
+		$staff_id = $url_arr[count($url_arr)-1];
+		
+		$theUrl     = config('app.api_url').'v1/staffs/'.$staff_id;
+
+		$response   = Http ::withHeaders([
+            'Authorization' => 'Bearer '.Session::get('user_details')->token			
+        ])->delete($theUrl);	
+
+        return redirect()->route('staffs.index');
     }
 }
